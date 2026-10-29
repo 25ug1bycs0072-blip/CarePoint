@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% set is_edit = item is not none %}
+{% block title %}{{ 'Edit' if is_edit else 'Add' }} {{ 'patient' if is_patient else 'staff member' }}{% endblock %}
+{% block content %}
+<div class="breadcrumb-line"><a href="{{ url_for('management.patients' if is_patient else 'management.staff') }}">{{ 'Patients' if is_patient else 'Doctors & staff' }}</a><span>/</span><span>{{ 'Edit profile' if is_edit else 'New profile' }}</span></div>
+<div class="form-page-heading"><span class="eyebrow">ACCOUNT MANAGEMENT</span><h1>{{ 'Update' if is_edit else 'Create' }} {{ 'patient' if is_patient else 'staff' }} profile</h1><p>Login accounts use the email and password entered here.</p></div>
+<form method="post" class="panel-card form-card">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <div class="row g-4">
+    <div class="col-md-6"><label class="form-label" for="name">Full name *</label><input class="form-control" id="name" name="name" maxlength="120" required value="{{ request.form.get('name', user.name if is_edit else '') }}"></div>
+    <div class="col-md-6"><label class="form-label" for="email">Email address *</label><input class="form-control" id="email" name="email" type="email" maxlength="190" required value="{{ request.form.get('email', user.email if is_edit else '') }}"></div>
+    <div class="col-md-6"><label class="form-label" for="password">{{ 'New password' if is_edit else 'Initial password' }}{% if not is_edit %} *{% endif %}</label><input class="form-control" id="password" name="password" type="password" minlength="12" autocomplete="new-password" {% if not is_edit %}required{% endif %}><div class="form-text">At least 12 characters{% if is_edit %}; leave blank to keep the current password{% endif %}.</div></div>
+    {% if not is_patient %}<div class="col-md-6"><label class="form-label" for="role">Role *</label><select class="form-select" id="role" name="role" required>{% for role in roles %}<option value="{{ role }}" {% if request.form.get('role', user.role if is_edit else '') == role %}selected{% endif %}>{{ role|title }}</option>{% endfor %}</select></div>{% endif %}
+    {% if is_patient %}
+      <div class="col-md-6"><label class="form-label" for="phone">Phone</label><input class="form-control" id="phone" name="phone" maxlength="30" value="{{ request.form.get('phone', item.phone if is_edit else '') }}"></div>
+      <div class="col-md-6"><label class="form-label" for="date_of_birth">Date of birth</label><input class="form-control" id="date_of_birth" name="date_of_birth" type="date" value="{{ request.form.get('date_of_birth', item.date_of_birth.isoformat() if is_edit and item.date_of_birth else '') }}"></div>
+      <div class="col-md-6"><label class="form-label" for="gender">Gender</label><select class="form-select" id="gender" name="gender"><option value="">Not specified</option>{% for option in ['Female','Male','Non-binary','Other'] %}<option {% if request.form.get('gender', item.gender if is_edit else '') == option %}selected{% endif %}>{{ option }}</option>{% endfor %}</select></div>
+      <div class="col-md-6"><label class="form-label" for="blood_group">Blood group</label><select class="form-select" id="blood_group" name="blood_group"><option value="">Not specified</option>{% for option in ['A+','A-','B+','B-','AB+','AB-','O+','O-'] %}<option {% if request.form.get('blood_group', item.blood_group if is_edit else '') == option %}selected{% endif %}>{{ option }}</option>{% endfor %}</select></div>
+      <div class="col-12"><label class="form-label" for="address">Address</label><input class="form-control" id="address" name="address" maxlength="255" value="{{ request.form.get('address', item.address if is_edit else '') }}"></div>
+    {% else %}
+      <div class="col-md-6"><label class="form-label" for="employee_id">Employee ID *</label><input class="form-control" id="employee_id" name="employee_id" maxlength="24" {% if is_edit %}required{% endif %} value="{{ request.form.get('employee_id', item.employee_id if is_edit else '') }}"><div class="form-text">Leave blank on creation to generate an ID.</div></div>
+      <div class="col-md-6"><label class="form-label" for="department">Department</label><input class="form-control" id="department" name="department" maxlength="100" value="{{ request.form.get('department', item.department if is_edit else '') }}"></div>
+      <div class="col-md-6"><label class="form-label" for="specialization">Specialization</label><input class="form-control" id="specialization" name="specialization" maxlength="120" value="{{ request.form.get('specialization', item.specialization if is_edit else '') }}"></div>
+      <div class="col-md-6"><label class="form-label" for="phone">Phone</label><input class="form-control" id="phone" name="phone" maxlength="30" value="{{ request.form.get('phone', item.phone if is_edit else '') }}"></div>
+      <div class="col-md-6"><label class="form-label" for="hire_date">Hire date</label><input class="form-control" id="hire_date" name="hire_date" type="date" value="{{ request.form.get('hire_date', item.hire_date.isoformat() if is_edit and item.hire_date else '') }}"></div>
+    {% endif %}
+  </div>
+  <div class="form-actions"><a class="btn btn-light" href="{{ url_for('management.patients' if is_patient else 'management.staff') }}">Cancel</a><button type="submit" class="btn btn-primary">{{ 'Save changes' if is_edit else 'Create account' }}</button></div>
+</form>
+{% endblock %}

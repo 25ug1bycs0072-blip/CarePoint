@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Welcome{% endblock %}
+{% block public_content %}
+<main class="public-shell">
+  <nav class="public-nav"><a class="brand" href="{{ url_for('main.home') }}"><span class="brand-mark">+</span><span>CarePoint <small>HOSPITAL</small></span></a><a href="{{ url_for('auth.login') }}" class="btn btn-outline-primary">Staff sign in</a></nav>
+  <section class="hero">
+    <div class="hero-copy"><span class="eyebrow">PATIENT-CENTRED CARE</span><h1>Better care starts with a <em>connected team.</em></h1><p>Manage appointments, care records, laboratory results, and billing in one secure hospital workspace.</p><div class="hero-actions"><a class="btn btn-primary btn-lg" href="{{ url_for('auth.register') }}">Create patient account</a><a class="btn btn-light btn-lg" href="{{ url_for('auth.login') }}">Sign in</a></div><div class="hero-note">For emergencies, contact your local emergency service.</div></div>
+    <div class="hero-card"><div class="hero-icon">✚</div><div class="hero-card-title">Care, coordinated.</div><p>One place for your care journey.</p><div class="hero-stat"><span class="status-dot"></span> Secure patient access</div></div>
+  </section>
+  <section class="feature-row"><div><b>01</b><strong>Appointments</strong><span>Request and track visits.</span></div><div><b>02</b><strong>Medical records</strong><span>Review care notes and prescriptions.</span></div><div><b>03</b><strong>Billing</strong><span>See invoices and payment status.</span></div></section>
+</main>
+{% endblock %}

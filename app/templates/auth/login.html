@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Sign in{% endblock %}
+{% block public_content %}
+<main class="auth-page">
+  <a class="brand auth-brand" href="{{ url_for('main.home') }}"><span class="brand-mark">+</span><span>CarePoint <small>HOSPITAL</small></span></a>
+  <section class="auth-card">
+    <span class="eyebrow">WELCOME BACK</span><h1>Sign in to your account</h1><p class="muted">Access your hospital workspace securely.</p>
+    {% with messages = get_flashed_messages(with_categories=true) %}{% for category, message in messages %}<div class="alert alert-{{ category }}">{{ message }}</div>{% endfor %}{% endwith %}
+    <form method="post" novalidate>
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <label class="form-label" for="email">Email address</label><input class="form-control form-control-lg mb-3" id="email" name="email" type="email" autocomplete="username" maxlength="190" required autofocus>
+      <label class="form-label" for="password">Password</label><input class="form-control form-control-lg mb-3" id="password" name="password" type="password" autocomplete="current-password" required>
+      <label class="remember-row"><input type="checkbox" name="remember"> Keep me signed in on this device</label>
+      <button class="btn btn-primary btn-lg w-100 mt-3" type="submit">Sign in</button>
+    </form>
+    <div class="auth-bottom">Patient new to CarePoint? <a href="{{ url_for('auth.register') }}">Create an account</a></div>
+  </section>
+  <p class="auth-foot">Your health information is private. Never share your password.</p>
+</main>
+{% endblock %}

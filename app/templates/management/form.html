@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit' if editing else 'New' }} {{ spec.title }}{% endblock %}
+{% block content %}
+<div class="breadcrumb-line"><a href="{{ url_for('management.index', key=key) }}">{{ spec.title }}</a><span>/</span><span>{{ 'Edit record' if editing else 'New record' }}</span></div>
+<div class="form-page-heading"><span class="eyebrow">CARE & OPERATIONS</span><h1>{{ 'Update' if editing else 'Create' }} {{ spec.title|replace('Medical records','medical record')|replace('Appointments','appointment')|replace('Prescriptions','prescription')|replace('Billing','bill')|replace('Laboratory','lab test')|lower }}</h1><p>Enter accurate information. Required fields are marked.</p></div>
+<form method="post" class="panel-card form-card">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <div class="row g-4">{% for name, label, kind in fields %}{% set is_required = name in ['patient_id','doctor_id','scheduled_at','reason','diagnosis','medication','dosage','frequency','duration','amount','description','test_name'] or (name == 'medical_record_id' and key == 'prescriptions') %}
+    <div class="col-md-{{ '12' if kind == 'textarea' else '6' }}">
+      <label class="form-label" for="{{ name }}">{{ label }}{% if is_required %} <span class="required-mark">*</span>{% endif %}</label>
+      {% if name in options %}
+        <select class="form-select" id="{{ name }}" name="{{ name }}" {% if is_required %}required{% endif %}>
+          <option value="">Choose {{ label|lower }}{% if not is_required %} (optional){% endif %}</option>
+          {% for value, text in options[name] %}{% set chosen = request.form.get(name, item|attr(name) if item else '') %}<option value="{{ value }}" {% if chosen|string == value|string %}selected{% endif %}>{{ text }}</option>{% endfor %}
+        </select>
+      {% elif kind == 'textarea' %}
+        <textarea class="form-control" id="{{ name }}" name="{{ name }}" rows="4" maxlength="5000" {% if is_required %}required{% endif %}>{{ request.form.get(name, item|attr(name) if item else '') }}</textarea>
+      {% else %}
+        {% set existing = item|attr(name) if item else '' %}
+        {% if kind == 'datetime-local' and existing %}{% set existing = existing.strftime('%Y-%m-%dT%H:%M') %}{% elif kind == 'date' and existing %}{% set existing = existing.strftime('%Y-%m-%d') %}{% endif %}
+        <input class="form-control" id="{{ name }}" name="{{ name }}" type="{{ 'number' if kind == 'currency' else kind if kind in ['date','datetime-local','number'] else 'text' }}" value="{{ request.form.get(name, existing) }}" {% if kind == 'currency' %}inputmode="decimal" min="0" max="99999999.99" step="0.01"{% endif %} {% if kind == 'number' %}min="1" max="1440"{% endif %} {% if name == 'scheduled_at' and not editing %}min="{{ min_datetime }}"{% endif %} {% if is_required %}required{% endif %}>
+      {% endif %}
+    </div>
+  {% endfor %}</div>
+  <div class="form-actions"><a class="btn btn-light" href="{{ url_for('management.index', key=key) }}">Cancel</a><button type="submit" class="btn btn-primary">{{ 'Save changes' if editing else 'Create record' }}</button></div>
+</form>
+{% endblock %}

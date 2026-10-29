@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Overview{% endblock %}
+{% block content %}
+<div class="page-heading"><div><span class="eyebrow">YOUR WORKSPACE</span><h1>{% if patient_mode %}Welcome, {{ current_user.name.split(' ')[0] }}{% else %}Overview{% endif %}</h1><p>{% if patient_mode %}Your appointments and care information at a glance.{% else %}Here is what is happening at your hospital today.{% endif %}</p></div><span class="today-chip">{{ now.strftime('%A, %B %d, %Y') }}</span></div>
+{% if patient_mode %}
+  <div class="patient-welcome panel-card"><div><span class="eyebrow">PATIENT ID</span><h2>{{ patient.mrn }}</h2><p>Use the navigation to request visits and review available care information.</p></div><a class="btn btn-primary" href="{{ url_for('management.create', key='appointments') }}">Request an appointment <span aria-hidden="true">→</span></a></div>
+  <div class="section-title"><div><h2>Recent appointments</h2><p>Your upcoming and previous visits</p></div><a href="{{ url_for('management.index', key='appointments') }}">View all →</a></div>
+  <div class="panel-card table-panel">{% if appointments %}<div class="table-responsive"><table class="table align-middle"><thead><tr><th>Date & time</th><th>Doctor</th><th>Reason</th><th>Status</th></tr></thead><tbody>{% for a in appointments %}<tr><td>{{ a.scheduled_at.strftime('%b %d, %Y %H:%M') }}</td><td>{{ a.doctor.name }}</td><td>{{ a.reason }}</td><td><span class="badge-status status-{{ a.status }}">{{ a.status|replace('_',' ')|title }}</span></td></tr>{% endfor %}</tbody></table></div>{% else %}<div class="empty-state"><span>▣</span><strong>No appointments yet</strong><p>Request an appointment to get started.</p></div>{% endif %}</div>
+  <div class="section-title"><div><h2>Recent bills</h2><p>Payment information</p></div><a href="{{ url_for('management.index', key='billing') }}">View billing →</a></div>
+  <div class="panel-card table-panel">{% if bills %}<div class="table-responsive"><table class="table align-middle"><thead><tr><th>Description</th><th>Amount</th><th>Due</th><th>Status</th></tr></thead><tbody>{% for bill in bills %}<tr><td>{{ bill.description }}</td><td>${{ '%.2f'|format(bill.amount) }}</td><td>{{ bill.due_date.strftime('%b %d, %Y') if bill.due_date else '—' }}</td><td><span class="badge-status status-{{ bill.status }}">{{ bill.status|title }}</span></td></tr>{% endfor %}</tbody></table></div>{% else %}<div class="empty-state compact">No bills to show.</div>{% endif %}</div>
+{% else %}
+  {% if role == 'admin' or role == 'receptionist' %}
+  <div class="stats-grid">
+    <a class="stat-card" href="{{ url_for('management.patients') }}"><div class="stat-icon icon-blue">♙</div><div class="stat-label">Registered patients</div><div class="stat-value">{{ counts.patients }}</div><div class="stat-foot">Patient directory <span>→</span></div></a>
+    <a class="stat-card" href="{{ url_for('management.staff') }}"><div class="stat-icon icon-purple">♧</div><div class="stat-label">Clinical & support staff</div><div class="stat-value">{{ counts.staff }}</div><div class="stat-foot">Staff directory <span>→</span></div></a>
+    <a class="stat-card" href="{{ url_for('management.index', key='appointments') }}"><div class="stat-icon icon-green">▣</div><div class="stat-label">Today's appointments</div><div class="stat-value">{{ counts.today_appointments }}</div><div class="stat-foot">View schedule <span>→</span></div></a>
+    <a class="stat-card" href="{{ url_for('management.index', key='billing') }}"><div class="stat-icon icon-amber">$</div><div class="stat-label">Outstanding balance</div><div class="stat-value stat-money">${{ '%.2f'|format(counts.unpaid_total) }}</div><div class="stat-foot">Open billing <span>→</span></div></a>
+    <a class="stat-card" href="{{ url_for('management.index', key='laboratory') }}"><div class="stat-icon icon-purple">⌕</div><div class="stat-label">Pending lab tests</div><div class="stat-value">{{ counts.pending_labs }}</div><div class="stat-foot">Open laboratory <span>→</span></div></a>
+    <a class="stat-card" href="{{ url_for('management.index', key='records') }}"><div class="stat-icon icon-blue">▤</div><div class="stat-label">Medical records</div><div class="stat-value">{{ counts.records }}</div><div class="stat-foot">Review records <span>→</span></div></a>
+  </div>
+  {% endif %}
+  <div class="dashboard-grid">
+    <section class="panel-card chart-panel"><div class="panel-heading"><div><h2>Appointment activity</h2><p>Visits scheduled over the last six months</p></div><span class="chart-badge">6 months</span></div><div class="chart-wrap"><canvas id="appointmentChart" aria-label="Appointment volume for the last six months"></canvas></div></section>
+    <section class="panel-card quick-panel"><div class="panel-heading"><div><h2>Quick access</h2><p>Common tasks</p></div></div>
+      {% if role in ['admin','receptionist'] %}<a class="quick-link" href="{{ url_for('management.create_person', kind='patients') }}"><span class="quick-icon">＋</span><span><b>Register a patient</b><small>Add a patient profile</small></span><i>→</i></a>{% endif %}
+      {% if role == 'admin' %}<a class="quick-link" href="{{ url_for('management.create_person', kind='staff') }}"><span class="quick-icon">＋</span><span><b>Add a staff member</b><small>Create a role-based account</small></span><i>→</i></a>{% endif %}
+      {% if role in ['admin','receptionist'] %}<a class="quick-link" href="{{ url_for('management.create', key='appointments') }}"><span class="quick-icon">▣</span><span><b>Book an appointment</b><small>Schedule a patient visit</small></span><i>→</i></a>{% endif %}
+      {% if role in ['admin','doctor'] %}<a class="quick-link" href="{{ url_for('management.create', key='records') }}"><span class="quick-icon">▤</span><span><b>Add a medical record</b><small>Document a patient visit</small></span><i>→</i></a>{% endif %}
+      {% if role in ['admin','nurse','doctor'] %}<a class="quick-link" href="{{ url_for('management.create', key='laboratory') }}"><span class="quick-icon">⌕</span><span><b>Order a lab test</b><small>Record a laboratory request</small></span><i>→</i></a>{% endif %}
+    </section>
+  </div>
+  <section class="panel-card table-panel recent-panel"><div class="panel-heading"><div><h2>Latest appointments</h2><p>Most recently scheduled visits</p></div><a class="text-link" href="{{ url_for('management.index', key='appointments') }}">View schedule →</a></div>
+    {% if recent %}<div class="table-responsive"><table class="table align-middle"><thead><tr><th>Patient</th><th>Doctor</th><th>Date & time</th><th>Reason</th><th>Status</th></tr></thead><tbody>{% for a in recent %}<tr><td><b>{{ a.patient.name }}</b><small class="table-sub">{{ a.patient.mrn }}</small></td><td>{{ a.doctor.name }}</td><td>{{ a.scheduled_at.strftime('%b %d, %Y %H:%M') }}</td><td>{{ a.reason|truncate(42) }}</td><td><span class="badge-status status-{{ a.status }}">{{ a.status|replace('_',' ')|title }}</span></td></tr>{% endfor %}</tbody></table></div>{% else %}<div class="empty-state compact">No appointment activity yet.</div>{% endif %}
+  </section>
+{% endif %}
+{% endblock %}
+{% block scripts %}
+{% if not patient_mode %}<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script><script>
+  window.hospitalChartData = {{ {'labels': chart_labels, 'values': chart_values}|tojson }};
+</script>{% endif %}
+{% endblock %}

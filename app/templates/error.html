@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block title %}{{ code }}{% endblock %}
+{% block content %}
+<div class="error-page"><span class="brand-mark">+</span><div class="eyebrow">REQUEST UNAVAILABLE</div><h1>{{ code }}</h1><p>{{ message }}</p><a class="btn btn-primary" href="{{ url_for('main.home') }}">Return to CarePoint</a></div>
+{% endblock %}
+{% block public_content %}
+<main class="error-page"><span class="brand-mark">+</span><div class="eyebrow">REQUEST UNAVAILABLE</div><h1>{{ code }}</h1><p>{{ message }}</p><a class="btn btn-primary" href="{{ url_for('main.home') }}">Return to CarePoint</a></main>
+{% endblock %}

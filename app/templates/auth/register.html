@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Patient registration{% endblock %}
+{% block public_content %}
+<main class="auth-page">
+  <a class="brand auth-brand" href="{{ url_for('main.home') }}"><span class="brand-mark">+</span><span>CarePoint <small>HOSPITAL</small></span></a>
+  <section class="auth-card auth-card-wide">
+    <span class="eyebrow">PATIENT PORTAL</span><h1>Create your account</h1><p class="muted">Register to request appointments and review your care information.</p>
+    {% with messages = get_flashed_messages(with_categories=true) %}{% for category, message in messages %}<div class="alert alert-{{ category }}">{{ message }}</div>{% endfor %}{% endwith %}
+    <form method="post">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="row g-3">
+        <div class="col-md-6"><label class="form-label" for="name">Full name *</label><input class="form-control" id="name" name="name" maxlength="120" required value="{{ request.form.get('name','') }}"></div>
+        <div class="col-md-6"><label class="form-label" for="email">Email address *</label><input class="form-control" id="email" name="email" type="email" maxlength="190" required value="{{ request.form.get('email','') }}"></div>
+        <div class="col-md-6"><label class="form-label" for="password">Password *</label><input class="form-control" id="password" name="password" type="password" minlength="12" autocomplete="new-password" required><div class="form-text">Use at least 12 characters.</div></div>
+        <div class="col-md-6"><label class="form-label" for="phone">Phone</label><input class="form-control" id="phone" name="phone" maxlength="30" value="{{ request.form.get('phone','') }}"></div>
+        <div class="col-md-6"><label class="form-label" for="date_of_birth">Date of birth</label><input class="form-control" id="date_of_birth" name="date_of_birth" type="date" max="{{ today }}" value="{{ request.form.get('date_of_birth','') }}"></div>
+        <div class="col-md-6"><label class="form-label" for="gender">Gender</label><select class="form-select" id="gender" name="gender"><option value="">Prefer not to say</option>{% for option in ['Female','Male','Non-binary','Other'] %}<option>{{ option }}</option>{% endfor %}</select></div>
+        <div class="col-12"><label class="form-label" for="address">Address</label><input class="form-control" id="address" name="address" maxlength="255" value="{{ request.form.get('address','') }}"></div>
+      </div>
+      <button class="btn btn-primary btn-lg w-100 mt-4" type="submit">Create patient account</button>
+    </form>
+    <div class="auth-bottom">Already registered? <a href="{{ url_for('auth.login') }}">Sign in</a></div>
+  </section>
+</main>
+{% endblock %}
